@@ -6,7 +6,6 @@ import com.google.gson.Gson;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;

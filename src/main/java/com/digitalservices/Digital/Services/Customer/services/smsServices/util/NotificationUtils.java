@@ -5,24 +5,33 @@ import com.digitalservices.Digital.Services.Customer.services.smsServices.Consta
 import com.twilio.Twilio;
 import com.twilio.rest.api.v2010.account.Message;
 import com.twilio.rest.api.v2010.account.MessageCreator;
+import com.twilio.rest.verify.v2.Service;
+import com.twilio.rest.verify.v2.service.Verification;
+import com.twilio.rest.verify.v2.service.VerificationCheck;
 import com.twilio.type.PhoneNumber;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
+import java.util.Objects;
 import java.util.Random;
 
-
 @Component
-@PropertySource(value = "classpath:application.properties")
+//@PropertySource(value = "classpath:application.properties")
 public class NotificationUtils {
+
+    private static final String ACCOUNT_SID = Constants.ACCOUNT_SID;
+    private static final String AUTH_TOKEN = Constants.AUTH_TOKEN;
+
     @Autowired
     private Environment env;
 
     public String sendSMS(User user) {
-        Twilio.init(env.getProperty(Constants.ACCOUNT_SID),
-                env.getProperty(Constants.AUTH_TOKEN));
+        Twilio.init(ACCOUNT_SID, AUTH_TOKEN);
+        Twilio.setUsername(ACCOUNT_SID);
+        Twilio.setPassword(AUTH_TOKEN);
+
 
         String otp=generateOTP();
         MessageCreator message = Message.creator(
@@ -35,7 +44,11 @@ public class NotificationUtils {
     }
 
     private String generateOTP() {
-        return String.valueOf(new Random().nextInt(95509));
+        return String.valueOf(new Random().nextInt(9999));
     }
+
+
 }
+
+
 

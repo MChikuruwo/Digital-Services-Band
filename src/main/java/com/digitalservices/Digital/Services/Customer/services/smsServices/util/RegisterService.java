@@ -21,18 +21,18 @@ public class RegisterService {
         activeUser = new ArrayList<>();
     }
 
-    public String Register(User user) throws OTPException {
-        try {
+   public String Register(User user) throws OTPException {
+
             otp.add(utils.sendSMS(user));
             activeUser.add(user);
-        } catch (ApiException e) {
-            throw new OTPException(
-                    "Internal Server issue Possible error  Number may not contains country code or  May not Registered in Twillo ,click on Back button to Re-Registration");
-        }
+
         return "Thanks for giving your details";
     }
+
+
 
     public User getActiveUser() {
         return activeUser.get(0);
     }
 }
+

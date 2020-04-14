@@ -6,6 +6,7 @@ import com.digitalservices.Digital.Services.Customer.dto.AddUserDto;
 import com.digitalservices.Digital.Services.Customer.dto.GenerateCredentialsDto;
 import com.digitalservices.Digital.Services.Customer.dto.LoginDto;
 import com.digitalservices.Digital.Services.Customer.dto.UpdateUserDto;
+import com.digitalservices.Digital.Services.Customer.exceptions.OTPException;
 import com.digitalservices.Digital.Services.Customer.models.Login;
 import com.digitalservices.Digital.Services.Customer.models.User;
 import com.digitalservices.Digital.Services.Customer.models.api.ApiResponse;
@@ -13,6 +14,7 @@ import com.digitalservices.Digital.Services.Customer.security.JwtTokenProvider;
 import com.digitalservices.Digital.Services.Customer.services.LoginService;
 import com.digitalservices.Digital.Services.Customer.services.RoleService;
 import com.digitalservices.Digital.Services.Customer.services.UserService;
+import com.digitalservices.Digital.Services.Customer.services.smsServices.Constants;
 import com.digitalservices.Digital.Services.Customer.services.smsServices.SmsRequest;
 import com.digitalservices.Digital.Services.Customer.services.smsServices.SmsSender;
 import com.digitalservices.Digital.Services.Customer.services.smsServices.SmsService;
@@ -31,6 +33,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.validation.Valid;
 import java.util.Collections;
 import java.util.Random;
 
@@ -51,19 +54,21 @@ public class UserController {
     private final SmsSender smsSender;
     private final SmsConfig smsConfig;
     private final SmsService smsService;
+    //private final SmsVerification smsVerification;
     private final JwtTokenProvider jwtTokenProvider;
     private final AuthenticationManager authenticationManager;
 
     @Autowired
-    public UserController(UserService userService, LoginService loginService, RoleService roleService,ModelMapper modelMapper,  RegisterService service,SmsSender smsSender,SmsConfig smsConfig,SmsService smsService, JwtTokenProvider jwtTokenProvider, AuthenticationManager authenticationManager) {
+    public UserController(UserService userService, LoginService loginService, RoleService roleService,ModelMapper modelMapper , RegisterService service ,SmsSender smsSender,SmsConfig smsConfig,SmsService smsService,/*SmsVerification smsVerification,*/ JwtTokenProvider jwtTokenProvider, AuthenticationManager authenticationManager) {
         this.userService = userService;
         this.loginService = loginService;
         this.roleService = roleService;
         this.modelMapper = modelMapper;
-        this.service = service;
+       this.service = service;
         this.smsSender = smsSender;
         this.smsConfig = smsConfig;
         this.smsService = smsService;
+        //this.smsVerification = smsVerification;
         this.jwtTokenProvider = jwtTokenProvider;
         this.authenticationManager = authenticationManager;
     }
@@ -87,32 +92,35 @@ public class UserController {
     }
 
     @PostMapping(value = "/signup/{role-id}", produces = MediaType.APPLICATION_JSON_VALUE)
-    @ApiOperation(value = "Register a user onto the Request Forms Portal", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ApiResponse addUser(@RequestBody AddUserDto addUserDto, @PathVariable("role-id") Integer roleId, HttpServletRequest request){
+    @ApiOperation(value = "Opt-in a user to join the User Services Band Platform", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ApiResponse addUser(@Valid @RequestBody AddUserDto addUserDto, @PathVariable("role-id") Integer roleId, HttpServletRequest request) throws OTPException {
         User user = modelMapper.map(addUserDto, User.class);
 
         // Assign the role of the user
         user.setRoles(Collections.singleton(roleService.getOne(roleId)));
 
         // Generate the otp for user
-        String otp = generatePassword(user.getMobileNumber());
+        String otp = generateOTP(user.getMobileNumber());
 
         // Set the user password to the generated password
         user.setOtp(otp);
 
         // Set user active true by default
-        //user.setActive(true);
+        user.setActive(true);
         //TODO interchange user.setActive with service.getActiveUser if it fails
-        service.getActiveUser();
+        //service.getActiveUser();
 
         // Send a confirmation email message
         String appUrl = request.getScheme() + "://" + request.getServerName() + request.getContextPath();
 
         SmsRequest registrationSms = new SmsRequest();
       registrationSms.setPhoneNumber(registrationSms.getPhoneNumber(user.getMobileNumber()));
-        //registrationSms.setSubject("Steward Bank Request Forms Portal");
-        registrationSms.setMessage(" Dear " + user.getMobileNumber() + "your OTP for the Digital Services Band Platform is:\n"  + "OTP\n"+ otp +"Use it within 24 hours to proceed to the questionnaire");
-        registrationSms.setFrom(registrationSms.getPhoneNumber(smsConfig.getTrialNumber()));
+        registrationSms.setMessage(" Dear " + user.getMobileNumber() + "You have been Registered  as a "+ roleService.getOne(roleId).getName() + "on the Digital Services Band Platform your OTP is:\n"  + "OTP\n"+ otp +"Use it within 24 hours to proceed to the questionnaire");
+        registrationSms.setFrom(registrationSms.getPhoneNumber(Constants.TRIAL_NO));
+
+        //smsVerification.checkVerification(registrationSms.getPhoneNumber(user.getMobileNumber()),"+263");
+
+        service.Register(user);
 
         smsService.sendSms(registrationSms);
 
@@ -121,13 +129,16 @@ public class UserController {
     }
 
     //generated OTP to be sent to the user
-   private String generatePassword(String otp) {
-        String generatedPassword;
+   private String generateOTP(String otp) {
+        String generatedOTP;
         // Generate random number to be used as the OTP
         Random randomNumber = new Random();
         int n = 1000 + randomNumber.nextInt(9999);
-        generatedPassword = (String.valueOf(n));
-        return generatedPassword;
+        generatedOTP = (String.valueOf(n));
+        return generatedOTP;
+
+
+
     }
 
 
@@ -139,7 +150,7 @@ public class UserController {
     }
 
     @PostMapping(value = "/signin")
-    @ApiOperation("Enables a user to login with email address and password")
+    @ApiOperation("Enables a user to login with phone Number and otp")
     public ResponseEntity loginWithMobileNumberAndOTP(@RequestBody LoginDto accountCredentials) {
         Authentication authentication = authenticationManager.
                 authenticate(new UsernamePasswordAuthenticationToken(
@@ -161,28 +172,32 @@ public class UserController {
             return ResponseEntity.ok().header(HEADER_STRING, TOKEN_PREFIX + " " + jwt).body(response);
         }
         else {
-            response = new ApiResponse(401,"Invalid email address or password");
+            response = new ApiResponse(401,"Invalid mobile number or expired otp");
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).contentType(MediaType.TEXT_PLAIN).body(response);
 
         }
     }
 
     @PostMapping("/generate-credentials")
-    @ApiOperation(value = "Generates new password for user.", response = ApiResponse.class)
-    public ApiResponse generateCredentialsForUser(@RequestBody GenerateCredentialsDto credentialsDto){
+    @ApiOperation(value = "Generates new otp for user.", response = ApiResponse.class)
+    public ApiResponse generateCredentialsForUser(@RequestBody GenerateCredentialsDto credentialsDto) throws OTPException {
         // Get user by their mobile number
         User user = userService.findByMobileNumber(credentialsDto.getMobileNumber());
 
         // Generate the otp which the user will use for authentication
-        String otp = generatePassword(user.getOtp());
+        String otp = generateOTP(user.getOtp());
 
         // Set the user otp to the generated otp
         user.setOtp(otp);
 
         SmsRequest generatedCredentialsSms = new SmsRequest();
         generatedCredentialsSms.setPhoneNumber(generatedCredentialsSms.getPhoneNumber(user.getMobileNumber()));
-        generatedCredentialsSms.setMessage(" Dear " + user.getMobileNumber() + "your OTP for the Digital Services Band Platform is:\n"  + "OTP\n"+ otp +"Use it within 24 hours to proceed to the questionnaire");
-        generatedCredentialsSms.setFrom(generatedCredentialsSms.getPhoneNumber(smsConfig.getTrialNumber()));
+        generatedCredentialsSms.setMessage(" Dear " + user.getMobileNumber() + "You have been Registered  as a "+ user.getRoles().toString() + "on the Digital Services Band Platform your OTP is:\n"  + "OTP\n"+ otp +"Use it within 24 hours to proceed to the questionnaire");
+        generatedCredentialsSms.setFrom(generatedCredentialsSms.getPhoneNumber(Constants.TRIAL_NO));
+
+        //service.Register(user);
+
+       // smsVerification.checkVerification(generatedCredentialsSms.getPhoneNumber(user.getMobileNumber()),"+263");
 
         smsService.sendSms(generatedCredentialsSms);
 

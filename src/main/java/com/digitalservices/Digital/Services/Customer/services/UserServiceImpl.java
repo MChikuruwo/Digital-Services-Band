@@ -93,7 +93,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         }
         //Check user entered password if it matches hashed password in database
         if (!passwordEncoder.matches(otp, user.getOtp())){
-            throw new BadCredentialsException("Incorrect password");
+            throw new BadCredentialsException("Incorrect/Expired otp");
         }
         //Else return the user if found
         return user;
@@ -114,7 +114,6 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     public UserDetails loadUserByUsername(String mobileNumber) throws UsernameNotFoundException {
         User user = userRepository.findUserByMobileNumber(mobileNumber);
         if (user == null){
-            //TODO: Set an error that the user by that email address cannot be found
             throw new UsernameNotFoundException("Could not find the user " + mobileNumber);
         }
         return new MyUserPrincipal(user);
