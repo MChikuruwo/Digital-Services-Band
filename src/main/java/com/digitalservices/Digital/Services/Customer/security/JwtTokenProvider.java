@@ -17,8 +17,8 @@ public class JwtTokenProvider {
 
     private static final Logger logger = LoggerFactory.getLogger(JwtTokenProvider.class);
 
-    private static final long EXPIRATION_TIME = 864_00; // 24 hours
-    private static final String SECRET = "whu4b239enridfq";
+    private static final long EXPIRATION_TIME = 864_000_000; // 10 days
+    private static final String SECRET = "whu4b239enridfquioonhgf238dhfdkjhdsa7ue989dhkhyghbjzkdnmklk12876hjdjbhvcg";
     private static final String TOKEN_PREFIX = "Bearer";
     private static final String HEADER_STRING = "Authorization";
 
@@ -28,7 +28,7 @@ public class JwtTokenProvider {
         return Jwts.builder()
                 .setSubject(authentication.getName())
                 .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
-                .signWith(SignatureAlgorithm.HS512, SECRET)
+                .signWith(SignatureAlgorithm.HS256, SECRET)
                 .compact();
     }
 

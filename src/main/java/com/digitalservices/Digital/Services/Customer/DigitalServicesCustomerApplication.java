@@ -12,7 +12,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 @SpringBootApplication
 @ComponentScan("com.digitalservices.Digital.Services.Customer.services")
 @ComponentScan("com.digitalservices.Digital.Services.Customer.config")
-
 public class DigitalServicesCustomerApplication {
 
 	public static void main(String[] args) {

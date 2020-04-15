@@ -1,5 +1,6 @@
 package com.digitalservices.Digital.Services.Customer.services.smsServices;
 
+//import com.digitalservices.Digital.Services.Customer.config.SmsConfig;
 import com.digitalservices.Digital.Services.Customer.config.SmsConfig;
 import com.digitalservices.Digital.Services.Customer.models.User;
 import com.twilio.rest.api.v2010.account.Message;
@@ -15,7 +16,7 @@ import org.springframework.stereotype.Service;
 
         private static final Logger LOGGER = LoggerFactory.getLogger(SmsGatewaySender.class);
 
-        private final SmsConfig smsConfig;
+       private final SmsConfig smsConfig;
 
         @Autowired
         public SmsGatewaySender(SmsConfig smsConfig) {
@@ -23,6 +24,8 @@ import org.springframework.stereotype.Service;
         }
 
         @Override
+
+
         public void sendSms(SmsRequest smsRequest) {
             User user = new User();
             if (isPhoneNumberValid(smsRequest.getPhoneNumber(user.getMobileNumber()))) {
