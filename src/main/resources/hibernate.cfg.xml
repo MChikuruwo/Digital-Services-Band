@@ -6,10 +6,15 @@
   <session-factory>
     <property name="connection.url">jdbc:mysql://localhost:3306/digital_services_base</property>
     <property name="connection.driver_class">com.mysql.cj.jdbc.Driver</property>
-    <mapping class="com.digitalservices.Digital.Services.Customer.models.Login"/>
+      <mapping class="com.digitalservices.Digital.Services.Customer.models.Login"/>
       <mapping class="com.digitalservices.Digital.Services.Customer.models.Role"/>
       <mapping class="com.digitalservices.Digital.Services.Customer.models.User"/>
       <mapping class="com.digitalservices.Digital.Services.Customer.models.UserRole"/>
+      <mapping class="com.digitalservices.Digital.Services.Customer.models.Amounts"/>
+      <mapping class="com.digitalservices.Digital.Services.Customer.models.Bundles"/>
+      <mapping class="com.digitalservices.Digital.Services.Customer.models.Devices"/>
+      <mapping class="com.digitalservices.Digital.Services.Customer.models.OptIn"/>
+      <mapping class="com.digitalservices.Digital.Services.Customer.models.Services"/>
       <!-- <property name="connection.username"/> -->
     <!-- <property name="connection.password"/> -->
 
