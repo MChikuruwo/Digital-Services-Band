@@ -2,6 +2,7 @@ package com.digitalservices.Digital.Services.Customer.services.smsServices;
 
 //import com.digitalservices.Digital.Services.Customer.config.SmsConfig;
 import com.digitalservices.Digital.Services.Customer.config.SmsConfig;
+import com.digitalservices.Digital.Services.Customer.models.OptIn;
 import com.digitalservices.Digital.Services.Customer.models.User;
 import com.twilio.rest.api.v2010.account.Message;
 import com.twilio.rest.api.v2010.account.MessageCreator;
@@ -38,6 +39,24 @@ import org.springframework.stereotype.Service;
             } else {
                 throw new IllegalArgumentException(
                         "Phone number [" + smsRequest.getPhoneNumber(user.getMobileNumber()) + "] is not a valid number"
+                );
+            }
+
+        }
+
+        @Override
+        public void sendRegistrationSms(RegistrationSmsRequest registrationSmsRequest) {
+            OptIn optIn = new OptIn();
+            if (isPhoneNumberValid(registrationSmsRequest.getPhoneNumber(optIn.getMobileNumber()))) {
+                PhoneNumber to = new PhoneNumber(registrationSmsRequest.getPhoneNumber(optIn.getMobileNumber()));
+                PhoneNumber from = new PhoneNumber(smsConfig.getTrialNumber());
+                String message = registrationSmsRequest.getMessage();
+                MessageCreator creator = Message.creator(to, from, message);
+                creator.create();
+                LOGGER.info("Send sms {}", registrationSmsRequest);
+            } else {
+                throw new IllegalArgumentException(
+                        "Phone number [" + registrationSmsRequest.getPhoneNumber(optIn.getMobileNumber()) + "] is not a valid number"
                 );
             }
 

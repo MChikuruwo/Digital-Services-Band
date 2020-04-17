@@ -1,15 +1,13 @@
 package com.digitalservices.Digital.Services.Customer.services.smsServices;
 
 import com.digitalservices.Digital.Services.Customer.models.OptIn;
-import com.digitalservices.Digital.Services.Customer.models.User;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import javax.validation.constraints.NotBlank;
 
+public class RegistrationSmsRequest {
 
-public class SmsRequest {
-
-    private final User user;
+    private final OptIn optIn;
 
     @NotBlank
     private  String mobileNumber; // destination
@@ -17,21 +15,21 @@ public class SmsRequest {
     @NotBlank
     private  String message;
 
-    public SmsRequest(@JsonProperty("mobileNumber") String mobileNumber, @JsonProperty("message") String message, User user) {
+    public RegistrationSmsRequest(@JsonProperty("mobileNumber") String mobileNumber, @JsonProperty("message") String message, OptIn optIn) {
         this.mobileNumber = mobileNumber;
         this.message = message;
-        this.user = user;
+        this.optIn = optIn;
     }
 
-    public SmsRequest(User user) {
+    public RegistrationSmsRequest(OptIn optIn) {
 
-        this.user = user;
+        this.optIn = optIn;
 
     }
 
 
     public String getPhoneNumber(String mobileNumber) {
-        return user.getMobileNumber();
+        return optIn.getMobileNumber();
     }
 
     public String setPhoneNumber(String mobileNumber) {
@@ -40,11 +38,11 @@ public class SmsRequest {
 
 
     public String getMessage() {
-        return " Dear " + user.getMobileNumber() + "\nYou have been Signed in on the Digital Services Band Platform your OTP is:\n"  + user.getOtp() +" \nUse it within 24 hours to proceed to the questionnaire";
+        return " Dear \n" + optIn.getMobileNumber() + "\nYou have been Successfully Registered on the Digital Services Band Platform ";
     }
 
     public String setMessage(String s) {
-        return " Dear " + user.getMobileNumber() + "\nYou have been Signed in on the Digital Services Band Platform your OTP is:\n" + user.getOtp() +" \nUse it within 24 hours to proceed to the questionnaire";
+        return " Dear \n" + optIn.getMobileNumber() + "\nYou have been Successfully Registered on the Digital Services Band Platform ";
     }
 
 
@@ -61,3 +59,4 @@ public class SmsRequest {
         return mobileNumber;
     }
 }
+

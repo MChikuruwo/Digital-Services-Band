@@ -62,7 +62,7 @@ public class BundlesServiceImpl implements BundlesService {
 
         @Override
         public Bundles findByType(String type) {
-            Bundles bundles = bundlesRepository.findByType(type);
+            Bundles bundles = bundlesRepository.findByBundleTypes(type);
             if (bundles == null){
                 throw new EntityNotFoundException("Bundle "
                         .concat(type).concat(" not found"));

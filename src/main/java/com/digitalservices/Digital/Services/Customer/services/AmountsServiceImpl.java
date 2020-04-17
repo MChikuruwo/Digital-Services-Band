@@ -63,7 +63,7 @@ public class AmountsServiceImpl implements AmountsService {
 
     @Override
     public Amounts findByAmount(String amount) {
-        Amounts amounts = amountsRepository.findByAmounts(amount);
+        Amounts amounts = amountsRepository.findByAmount(amount);
         if (amounts == null){
             throw new EntityNotFoundException("Amounts  "
                     .concat(amount).concat(" not found"));

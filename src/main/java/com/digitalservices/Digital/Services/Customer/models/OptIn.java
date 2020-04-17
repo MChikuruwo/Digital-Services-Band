@@ -5,12 +5,12 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import javax.persistence.*;
 import java.sql.Timestamp;
-import java.util.Objects;
 
 @Entity
 @Table(name = "opt_in", schema = "digital_services_base")
 public class OptIn {
     private Long id;
+    private String mobileNumber;
     private Integer age;
     private Boolean hasBeenApproved;
     private Timestamp dateCreated;
@@ -31,6 +31,16 @@ public class OptIn {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    @Basic
+    @Column(name = "mobile_number")
+    public String getMobileNumber() {
+        return mobileNumber;
+    }
+
+    public void setMobileNumber(String mobileNumber) {
+        this.mobileNumber = mobileNumber;
     }
 
     @Basic
@@ -82,12 +92,13 @@ public class OptIn {
 
         OptIn that = (OptIn) o;
 
-        if (!Objects.equals(id, that.id)) return false;
-        if (!Objects.equals(age, that.age)) return false;
-        if (!Objects.equals(hasBeenApproved, that.hasBeenApproved))
+        if (id != null ? !id.equals(that.id) : that.id != null) return false;
+        if (mobileNumber != null ? !mobileNumber.equals(that.mobileNumber) : that.mobileNumber != null) return false;
+        if (age != null ? !age.equals(that.age) : that.age != null) return false;
+        if (hasBeenApproved != null ? !hasBeenApproved.equals(that.hasBeenApproved) : that.hasBeenApproved != null)
             return false;
-        if (!Objects.equals(dateCreated, that.dateCreated)) return false;
-        if (!Objects.equals(dateUpdated, that.dateUpdated)) return false;
+        if (dateCreated != null ? !dateCreated.equals(that.dateCreated) : that.dateCreated != null) return false;
+        if (dateUpdated != null ? !dateUpdated.equals(that.dateUpdated) : that.dateUpdated != null) return false;
 
         return true;
     }
@@ -95,6 +106,7 @@ public class OptIn {
     @Override
     public int hashCode() {
         int result = id != null ? id.hashCode() : 0;
+        result = 31 * result + (mobileNumber != null ? mobileNumber.hashCode() : 0);
         result = 31 * result + (age != null ? age.hashCode() : 0);
         result = 31 * result + (hasBeenApproved != null ? hasBeenApproved.hashCode() : 0);
         result = 31 * result + (dateCreated != null ? dateCreated.hashCode() : 0);
@@ -153,7 +165,7 @@ public class OptIn {
     }
 
     @ManyToOne
-    @JoinColumn(name = "service_offered", referencedColumnName = "id", nullable = false)
+    @JoinColumn(name = "service_offered", referencedColumnName = "id")
     public Services getServiceOffered() {
         return serviceOffered;
     }

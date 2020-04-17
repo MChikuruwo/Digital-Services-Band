@@ -104,12 +104,12 @@ public class UserController {
         //TODO interchange user.setActive with service.getActiveUser if it fails
         //service.getActiveUser();
 
-        // Send a confirmation email message
+        // Send an otp text message
         String appUrl = request.getScheme() + "://" + request.getServerName() + request.getContextPath();
 
         SmsRequest registrationSms = new SmsRequest(user);
       registrationSms.setPhoneNumber(registrationSms.getPhoneNumber(user.getMobileNumber()));
-        registrationSms.setMessage(" Dear " + user.getMobileNumber() + "You have been Registered  as a "+ roleService.getOne(roleId).getName() + "on the Digital Services Band Platform your OTP is:\n"  + "OTP\n"+ otp +"Use it within 24 hours to proceed to the questionnaire");
+        registrationSms.setMessage(" Dear " + user.getMobileNumber() + "You have been Signed in  as a "+ roleService.getOne(roleId).getName() + "on the Digital Services Band Platform your OTP is:\n"  + "OTP\n"+ otp +"Use it within 24 hours to proceed to the questionnaire");
         registrationSms.setFrom(registrationSms.getPhoneNumber(smsConfig.getTrialNumber()));
 
         //smsVerification.checkVerification(registrationSms.getPhoneNumber(user.getMobileNumber()),"+263");

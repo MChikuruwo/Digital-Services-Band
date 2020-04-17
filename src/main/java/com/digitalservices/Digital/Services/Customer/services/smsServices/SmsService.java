@@ -21,4 +21,9 @@ public class SmsService {
     public void sendSms(SmsRequest smsRequest) {
         smsSender.sendSms(smsRequest);
     }
+
+    @Async
+    public void sendRegistrationSms(RegistrationSmsRequest registrationSmsRequest) {
+        smsSender.sendRegistrationSms(registrationSmsRequest);
+    }
 }
