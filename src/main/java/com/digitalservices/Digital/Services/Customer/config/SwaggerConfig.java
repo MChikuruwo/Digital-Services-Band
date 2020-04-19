@@ -20,7 +20,7 @@ public class SwaggerConfig {
     public Docket api(){
         return new Docket(DocumentationType.SWAGGER_2)
                 .select()
-                .apis(RequestHandlerSelectors.basePackage("zw.co.digitalServicesBand.api"))
+                .apis(RequestHandlerSelectors.basePackage("com.digitalservices.Digital.Services.Customer"))
                 .paths(PathSelectors.any())
                 .build()
                 .apiInfo(apiInfo());
@@ -29,8 +29,8 @@ public class SwaggerConfig {
 
     private ApiInfo apiInfo(){
         return new ApiInfo(
-                "Request Form Automation Platform REST API",
-                "REST API to be used on the to the Request Form Automation web portal.",
+                "Digital Services Customer Bands REST API",
+                "REST API to be used to opt-in/opt-out users on the digital services bands platform",
                 "API Terms of Service",
                 "Terms of service",
                 new Contact("Munyaradzi Chikuruwo", "www.digitalservicesbands.co.zw", "mchikuruwo@hotmail.com"),
