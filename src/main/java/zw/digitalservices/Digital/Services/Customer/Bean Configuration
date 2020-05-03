@@ -1,0 +1,56 @@
+<bean id="marshallingConverter" class="org.springframework.http.converter.xml.MarshallingHttpMessageConverter">
+    <property name="marshaller" ref="jaxbMarshaller" />
+    <property name="unmarshaller" ref="jaxbMarshaller" />
+</bean>
+
+<bean id="jaxbMarshaller" class="org.springframework.oxm.jaxb.Jaxb2Marshaller">
+<property name="classesToBeBound">
+    <list>
+
+    </list>
+</property>
+</bean>
+
+<bean id="restTemplate" class="org.springframework.web.client.RestTemplate">
+<property name="messageConverters">
+    <list>
+        <ref bean="marshallingConverter" />
+    </list>
+</property>
+</bean>
+
+<context:annotation-config/>
+
+<bean id="jacksonMessageConverter" class="org.springframework.http.converter.json.MappingJacksonHttpMessageConverter"/>
+<bean class="org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter">
+<property name="messageConverters">
+    <list>
+        <ref bean="jacksonMessageConverter"/>
+    </list>
+</property>
+</bean>
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/mvc https://www.springframework.org/schema/mvc/spring-mvc.xsd">
+
+<mvc:annotation-driven>
+    <mvc:message-converters>
+        <bean class="org.springframework.http.converter.StringHttpMessageConverter"/>
+        <bean class="org.springframework.http.converter.ResourceHttpMessageConverter"/>
+    </mvc:message-converters>
+</mvc:annotation-driven>
+
+</beans>
+
+<jxb:bindings xmlns:jxb="http://java.sun.com/xml/ns/jaxb" xmlns:xjc="http://java.sun.com/xml/ns/jaxb/xjc"
+              xmlns:xs="http://www.w3.org/2001/XMLSchema"
+              version="1.0">
+<jxb:bindings schemaLocation="mySchema.xsd">
+    <node>/xs:schema</node>
+    <jxb:globalBindings>
+        <xjc:simple/>
+    </jxb:globalBindings>
+</jxb:bindings>
