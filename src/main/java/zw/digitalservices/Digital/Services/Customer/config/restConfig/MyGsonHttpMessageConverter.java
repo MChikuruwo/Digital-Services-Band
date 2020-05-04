@@ -14,7 +14,7 @@ import java.util.Arrays;
 import java.util.List;
 
 
-/*@Component
+@Component
 public class MyGsonHttpMessageConverter extends GsonHttpMessageConverter {
     public MyGsonHttpMessageConverter() {
         List<MediaType> types = Arrays.asList(
@@ -28,5 +28,5 @@ public class MyGsonHttpMessageConverter extends GsonHttpMessageConverter {
 
 }
 
- */
+
 

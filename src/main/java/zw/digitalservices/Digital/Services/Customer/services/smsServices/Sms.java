@@ -4,10 +4,13 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
+import java.io.Serializable;
 
-@XmlAccessorType(XmlAccessType.FIELD)
 @XmlRootElement( name = "sms")
-public class SmsRequest {
+@XmlAccessorType(XmlAccessType.FIELD)
+public class Sms implements  Serializable{
+
+    private static final long serialVersionUID = 1L;
 
      @XmlElement(name = "user")
      private String user;
@@ -29,8 +32,18 @@ public class SmsRequest {
     private String clientSmsId;
 
 
+    public Sms() {
+        super();
+    }
 
-    public SmsRequest() {
+    public Sms(String user, String password, String mobiles, String sms, String senderId, String clientSmsId) {
+        super();
+        this.user = user;
+        this.password = password;
+        this.mobiles = mobiles;
+        this.sms = sms;
+        this.senderId = senderId;
+        this.clientSmsId = clientSmsId;
     }
 
     public String getUser() {
@@ -80,12 +93,9 @@ public class SmsRequest {
         this.clientSmsId = clientSmsId;
     }
 
-
-
-
     @Override
     public String toString() {
-        return "SmsRequest{" +
+        return "Sms{" +
                 "user='" + user + '\'' +
                 ", password='" + password + '\'' +
                 ", mobiles='" + mobiles + '\'' +

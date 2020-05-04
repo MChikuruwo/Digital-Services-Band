@@ -1,38 +1,33 @@
 package zw.digitalservices.Digital.Services.Customer.config.restConfig;
 
-import zw.digitalservices.Digital.Services.Customer.services.smsServices.SmsRequests;
+import zw.digitalservices.Digital.Services.Customer.services.smsServices.SmsList;
 import org.springframework.context.annotation.Configuration;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
-import javax.xml.bind.PropertyException;
 import java.io.File;
 
 @Configuration
 public class JaxbConfig {
 
     public void marshall() throws JAXBException {
-        try {
-            //SmsRequest smsRequest = new SmsRequest();
-            SmsRequests smsRequests = new SmsRequests();
-            JAXBContext jc = JAXBContext.newInstance( SmsRequests.class/*, SmsRequest.class*/);
-            Marshaller ms = jc.createMarshaller();
-            ms.getProperty(Marshaller.JAXB_FORMATTED_OUTPUT);
-            ms.marshal(smsRequests, System.out);
-           // ms.marshal(smsRequest, System.out);
+            SmsList smsList = new SmsList();
+            JAXBContext jaxbContext = JAXBContext.newInstance(SmsList.class);
+            Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
+
+            jaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
+
+            //Marshal the smslist list in console
+            jaxbMarshaller.marshal(smsList, System.out);
+
+            //Marshal the smslist list in file
              File file = new File("smslist.xml");
-            ms.marshal(smsRequests,file);
-            //File file1 = new File("sms.xml");
-            //ms.marshal(smsRequest,file);
+            jaxbMarshaller.marshal(smsList,file);
 
-        } catch (PropertyException e) {
-            System.out.println(""+e.getMessage());
-
-
-        }
 
     }
+
 
 }
 

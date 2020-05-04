@@ -1,11 +1,11 @@
 package zw.digitalservices.Digital.Services.Customer.api;
 
 
+import com.google.gson.Gson;
 import org.apache.tomcat.util.codec.binary.Base64;
-import org.springframework.http.client.support.BasicAuthenticationInterceptor;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.converter.HttpMessageConverter;
-import org.springframework.http.converter.StringHttpMessageConverter;
-import zw.digitalservices.Digital.Services.Customer.config.SmsConfig;
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import zw.digitalservices.Digital.Services.Customer.dto.AddUserDto;
 import zw.digitalservices.Digital.Services.Customer.dto.LoginDto;
 import zw.digitalservices.Digital.Services.Customer.dto.UpdateUserDto;
@@ -87,9 +87,9 @@ public class UserController {
         return new ApiResponse(200, "SUCCESS", userService.delete(id));
     }
 
-    @PostMapping(value = "/signup/{role-id}",consumes = MediaType.APPLICATION_JSON_VALUE, produces = {MediaType.TEXT_XML_VALUE, MediaType.APPLICATION_JSON_VALUE})
+    @PostMapping(value = "/signup/{role-id}",consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.TEXT_XML_VALUE)
     @ApiOperation(value = "Sends sms to a user to join the User Digital Band Platform",consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_XML_VALUE)
-    public   ApiResponse SendRegistrationSmsRequest(@Valid @RequestBody SmsRequests smsRequests,AddUserDto addUserDto,
+    public   ApiResponse SendRegistrationSmsRequest(@Valid @RequestBody SmsList smsList,AddUserDto addUserDto,
                                                   @PathVariable("role-id") Integer roleId, HttpServletRequest request) {
         User user = modelMapper.map(addUserDto, User.class);
        //SmsRequest smsRequest = modelMapper.map(smsRequestBody, SmsRequest.class);
@@ -111,20 +111,25 @@ public class UserController {
         // Send an otp text message
         String appUrl = request.getScheme() + "://" + request.getServerName() + request.getContextPath();
 
+            Sms sms = new Sms();
+            sms.setUser("Tapuwam");
+            sms.setPassword("@Tree123");
+            sms.setSms(" Dear " + user.getMobileNumber() + "You have been Signed in  as a on the Digital Services Band Platform your OTP is:\n" + "OTP\n" + otp + "Use it within 24 hours to proceed to the questionnaire");
+            sms.setSenderId("Digital");
+            sms.setMobiles(user.getMobileNumber());
+            sms.setClientSmsId("123");
 
-            SmsRequest smsRequest = new SmsRequest();
-            smsRequest.setUser("Tapuwam");
-            smsRequest.setPassword("@Tree123");
-            smsRequest.setSms(" Dear " + user.getMobileNumber() + "You have been Signed in  as a on the Digital Services Band Platform your OTP is:\n"  + "OTP\n"+ otp +"Use it within 24 hours to proceed to the questionnaire");
-            smsRequest.setSenderId("Digital");
-            smsRequest.setMobiles(user.getMobileNumber());
-            smsRequest.setClientSmsId("123");
-
-        //SmsRequests smsRequests = new SmsRequests();
-        smsRequests.setSmsRequests(smsRequest);
-        //smsRequests.getSmsRequests().add(smsRequest);
+            smsList.setSms(sms);
 
 
+
+        final RestTemplate restTemplate = new RestTemplate();
+
+        List<HttpMessageConverter<?>> messageConverters = new ArrayList<>();
+        MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter();
+        converter.setSupportedMediaTypes(Collections.singletonList(MediaType.ALL));
+        messageConverters.add(converter);
+        restTemplate.setMessageConverters(messageConverters);
         String plainCreds = "Tapuwam:@Tree123";
         byte[] plainCredsBytes = plainCreds.getBytes();
         byte[] base64CredsBytes = Base64.encodeBase64(plainCredsBytes);
@@ -132,16 +137,17 @@ public class UserController {
 
         HttpHeaders headers = new HttpHeaders();
         headers.add("Authorization", "Basic"  + base64Creds);
-        //headers.set("Authorization", String.valueOf(MediaType.TEXT_XML));
+        headers.add(HttpHeaders.CONTENT_TYPE," text/xml;charset=UTF-8");
+        headers.set("Authorization", String.valueOf(MediaType.TEXT_XML));
         headers.setContentType(MediaType.TEXT_XML);
         headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
-        HttpEntity  smsRequestHttpEntity = new HttpEntity(smsRequests,headers);
+        HttpEntity<SmsList> smsRequestHttpEntity = new HttpEntity<>(smsList,headers);
 
 
 
         //restTemplate.getInterceptors().add(new BasicAuthenticationInterceptor("Tapuwam", "@Tree123"));
-         ResponseEntity<SmsRequests> registrationSms = restTemplate.exchange( url,HttpMethod.POST,smsRequestHttpEntity, SmsRequests.class);
-        //SmsRequests registrationSms = restTemplate.postForObject( url,smsRequests, SmsRequests.class);
+         //ResponseEntity<SmsList> registrationSms = restTemplate.exchange( url,HttpMethod.POST,smsRequestHttpEntity,SmsList.class);
+        SmsList registrationSms = restTemplate.postForObject( url,smsRequestHttpEntity, SmsList.class);
 
         //smsService.sendSms(registrationSms);
         userService.add(user);
@@ -173,7 +179,7 @@ public class UserController {
 
     @PostMapping(value = "/signin")
     @ApiOperation("Enables a user to login with phone Number and otp")
-    public ResponseEntity loginWithMobileNumberAndOTP(@RequestBody LoginDto accountCredentials) {
+    public ResponseEntity<ApiResponse> loginWithMobileNumberAndOTP(@RequestBody LoginDto accountCredentials) {
         Authentication authentication = authenticationManager.
                 authenticate(new UsernamePasswordAuthenticationToken(
                         accountCredentials.getMobileNumber(),
