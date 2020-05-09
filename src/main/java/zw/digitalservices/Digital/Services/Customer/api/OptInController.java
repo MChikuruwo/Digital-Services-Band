@@ -1,17 +1,17 @@
 package zw.digitalservices.Digital.Services.Customer.api;
 
 
-import zw.digitalservices.Digital.Services.Customer.config.SmsConfig;
-import zw.digitalservices.Digital.Services.Customer.dto.AddOptInDto;
-import zw.digitalservices.Digital.Services.Customer.models.api.ApiResponse;
-import zw.digitalservices.Digital.Services.Customer.services.smsServices.RegistrationSmsRequest;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.RestTemplate;
+import zw.digitalservices.Digital.Services.Customer.config.SmsConfig;
+import zw.digitalservices.Digital.Services.Customer.dto.AddOptInDto;
 import zw.digitalservices.Digital.Services.Customer.models.*;
+import zw.digitalservices.Digital.Services.Customer.models.api.ApiResponse;
 import zw.digitalservices.Digital.Services.Customer.services.*;
 
 import javax.servlet.http.HttpServletRequest;
@@ -29,11 +29,11 @@ public class OptInController {
     private final BundlesService bundlesService;
     private  final ModelMapper modelMapper;
     private final SmsConfig smsConfig;
-   // private final SmsService smsService;
+   private final RestTemplate restTemplate;
 
 
     @Autowired
-    public OptInController(OptInService optInService,AmountsService amountsService,DeviceService deviceService,ServiceOfferedService serviceOfferedService,BundlesService bundlesService, ModelMapper modelMapper,SmsConfig smsConfig){
+    public OptInController(OptInService optInService,AmountsService amountsService,DeviceService deviceService,ServiceOfferedService serviceOfferedService,BundlesService bundlesService, ModelMapper modelMapper,SmsConfig smsConfig,RestTemplate restTemplate){
         this.optInService = optInService;
         this.amountsService = amountsService;
         this.deviceService = deviceService;
@@ -41,7 +41,7 @@ public class OptInController {
         this.bundlesService = bundlesService;
         this.modelMapper = modelMapper;
         this.smsConfig = smsConfig;
-       // this.smsService = smsService;
+       this.restTemplate = restTemplate;
     }
 
     @GetMapping("/")
@@ -105,7 +105,7 @@ public class OptInController {
     @ApiOperation(value = "Create a new opt-in record. " +
             "Takes amounts Ids, device Id,bundle Id and service Id  as path variables",
             response = ApiResponse.class)
-    public ApiResponse createOptIn(@RequestBody AddOptInDto optInDto,
+    public String createOptIn(@RequestBody AddOptInDto optInDto,
                                    @PathVariable("amount-on-sms-id") Long amountOnSmsId,
                                    @PathVariable("amount-on-data-id") Long amountOnDataId,
                                    @PathVariable("amount-on-voice-id") Long amountOnVoiceId,
@@ -124,22 +124,15 @@ public class OptInController {
         optIn.setServiceOffered(serviceOfferedService.getOne(serviceTypeId));
         optIn.setHasBeenApproved(false);
 
-        // Send confirmation text message
-        String appUrl = request.getScheme() + "://" + request.getServerName() + request.getContextPath();
+        optInService.add(optIn);
 
-        RegistrationSmsRequest registrationSms = new RegistrationSmsRequest(optIn);
-        registrationSms.setPhoneNumber(registrationSms.getPhoneNumber(optIn.getMobileNumber()));
-        registrationSms.setMessage(" Dear " + optIn.getMobileNumber() + "You have been Successfully Registered on the Digital Services Band Platform ");
-        registrationSms.setFrom(registrationSms.getPhoneNumber(smsConfig.getSenderId()));
+        String uri = "https://bulksms.econet.co.zw/sms/sendsms.jsp?user=Tapuwam&password=@Tree123&mobiles="+optInDto.getMobileNumber()+"&sms="+"Dear User You Have Been Successfully Registered On The Digital Services Band Platform&senderid=Digital";
 
-        //smsVerification.checkVerification(registrationSms.getPhoneNumber(opt.getMobileNumber()),"+263");
+        String result = restTemplate.getForObject(uri,  String.class);
+
+        return result;
 
 
-        //smsService.sendRegistrationSms(registrationSms);
-
-
-
-        return new ApiResponse(201, "SUCCESS", optInService.add(optIn));
     }
 
 

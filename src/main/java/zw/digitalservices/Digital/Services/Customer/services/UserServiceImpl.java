@@ -85,7 +85,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
     @Override
     public User authUser(String mobileNumber, String otp) throws Exception {
-        //First get the user by email to check if the user exists
+        //First get the user by mobile number to check if the user exists
         User user = userRepository.findUserByMobileNumber(mobileNumber);
         if (user == null){
             //Display an error that the user with the email address was not found
@@ -118,18 +118,6 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         }
         return new MyUserPrincipal(user);
     }
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
