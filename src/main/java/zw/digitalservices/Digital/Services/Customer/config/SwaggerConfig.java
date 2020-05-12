@@ -29,7 +29,7 @@ public class SwaggerConfig {
 
     private ApiInfo apiInfo(){
         return new ApiInfo(
-                "Digital Services Customer Bands REST API",
+                "Digital Services Customer Band REST API",
                 "REST API to be used to opt-in/opt-out users on the digital services bands platform",
                 "API Terms of Service",
                 "Terms of service",

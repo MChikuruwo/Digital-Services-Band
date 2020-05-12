@@ -136,7 +136,7 @@ public class UserController {
     }
 
     @PostMapping(value = "/signin")
-    @ApiOperation("Enables a user to login with phone Number and otp")
+    @ApiOperation("Enables a user to login with Mobile Number and OTP")
     public ResponseEntity<ApiResponse> loginWithMobileNumberAndOTP(@RequestBody LoginDto accountCredentials) {
         Authentication authentication = authenticationManager.
                 authenticate(new UsernamePasswordAuthenticationToken(
