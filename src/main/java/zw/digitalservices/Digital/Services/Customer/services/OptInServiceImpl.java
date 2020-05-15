@@ -1,9 +1,10 @@
 package zw.digitalservices.Digital.Services.Customer.services;
 
-import zw.digitalservices.Digital.Services.Customer.dao.OptInRepository;
-import zw.digitalservices.Digital.Services.Customer.models.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import zw.digitalservices.Digital.Services.Customer.dao.OptInRepository;
+import zw.digitalservices.Digital.Services.Customer.exceptions.UserAlreadyExistsException;
+import zw.digitalservices.Digital.Services.Customer.models.*;
 
 import javax.persistence.EntityNotFoundException;
 import javax.transaction.Transactional;
@@ -23,8 +24,10 @@ public class OptInServiceImpl  implements OptInService{
 
 
     @Override
-    public String add(OptIn optIn) {
-        optInRepository.save(optIn);
+    public String add(OptIn optIn){
+    Optional<OptIn> detailsFromDatabase = Optional.ofNullable(optInRepository.findByMobileNumber(optIn.getMobileNumber()));
+    if (detailsFromDatabase.isPresent())throw new UserAlreadyExistsException("User already exists");
+      optInRepository.save(optIn);
         return "Opt-in request has been submitted";
     }
 

@@ -41,9 +41,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         http.cors().and().csrf().disable()
                 // make sure we use stateless session; session won't be used to store user's state.
                 .authorizeRequests()
-                .antMatchers(HttpMethod.POST, "/api/v1/users/signin","/api/v1/users/signup/**").permitAll()
+                .antMatchers(HttpMethod.POST, "/api/v1/users/signin","/api/v1/users/signup/**","/api/v1/users/resend-OTP").permitAll()
                 .antMatchers("/", "/eureka/**").permitAll()
                 .antMatchers(HttpMethod.GET, "/api/v1/users/**").permitAll()
+                .antMatchers(HttpMethod.PUT, "/api/v1/users/resend-OTP").permitAll()
                 .antMatchers("/v2/api-docs", "/configuration/ui", "/swagger-resources/**", "/configuration/security", "/swagger-ui.html", "/webjars/**").permitAll()
                 .anyRequest().authenticated()
                 .and()

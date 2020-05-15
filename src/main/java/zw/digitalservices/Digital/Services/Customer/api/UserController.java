@@ -43,7 +43,6 @@ public class UserController {
     private final LoginService loginService;
     private final RoleService roleService;
     private  final ModelMapper modelMapper;
-    //private final SmsConfig smsConfig;
     private final RestTemplate restTemplate;
     private final JwtTokenProvider jwtTokenProvider;
     private final AuthenticationManager authenticationManager;
@@ -54,7 +53,6 @@ public class UserController {
         this.loginService = loginService;
         this.roleService = roleService;
         this.modelMapper = modelMapper;
-        //this.smsConfig = smsConfig;
         this.restTemplate = restTemplate;
         this.jwtTokenProvider = jwtTokenProvider;
         this.authenticationManager = authenticationManager;
@@ -79,10 +77,9 @@ public class UserController {
     }
 
     @PostMapping(value = "/signup/{role-id}",produces = {MediaType.APPLICATION_XML_VALUE,MediaType.APPLICATION_JSON_VALUE})
-    @ApiOperation(value = "Sends OTP to a user to proceed to the questions",produces = MediaType.APPLICATION_XML_VALUE)
+    @ApiOperation(value = "Sends OTP to a user to proceed to the questions only enter mobile number as the OTP is generated",produces = MediaType.APPLICATION_XML_VALUE)
     public String SendRegistrationOTP(@Valid @RequestBody  AddUserDto addUserDto,
                                                        @PathVariable("role-id") Integer roleId, HttpServletRequest request)  {
-
         User user = modelMapper.map(addUserDto, User.class);
 
         // Assign the role of the user
@@ -97,17 +94,15 @@ public class UserController {
         // Set the user otp to the generated otp
         user.setOtp(otp);
 
-
         // Send an otp text message
         String appUrl = request.getScheme() + "://" + request.getServerName() + request.getContextPath();
 
-        String uri = "https://bulksms.econet.co.zw/sms/sendsms.jsp?user=Tapuwam&password=@Tree123&mobiles="+user.getMobileNumber()+"&sms="+"Dear User Your OTP is:\n"+otp+"&senderid=Digital";
+        String uri = "https://bulksms.econet.co.zw/sms/sendsms.jsp?user=Tapuwam&password=@Tree123&mobiles="+user.getMobileNumber()+"&sms="+"Dear User Your One Time Pin is: "+otp+" Keep it safe and Do not share with anyone."+"&senderid=Digital";
 
 
         String response = restTemplate.getForObject( uri, String.class);
 
         userService.add(user);
-
 
         return response;
 
@@ -164,7 +159,7 @@ public class UserController {
         }
     }
 
-    @PostMapping("/generate-credentials")
+    @PutMapping(value = "/resend-OTP",produces = {MediaType.APPLICATION_XML_VALUE,MediaType.APPLICATION_JSON_VALUE})
     @ApiOperation(value = "Generates new OTP for user.", response = ApiResponse.class)
     public String generateCredentialsForUser(@RequestBody GenerateCredentialsDto credentialsDto)  {
         // Get user by their mobile number
@@ -176,10 +171,10 @@ public class UserController {
         // Set the user otp to the generated otp
         user.setOtp(otp);
 
-        String uri = "https://bulksms.econet.co.zw/sms/sendsms.jsp?user=Tapuwam&password=@Tree123&mobiles="+user.getMobileNumber()+"&sms="+"Dear User Your One Time Pin is:\n"+otp+"&senderid=Digital";
+        String uri = "https://bulksms.econet.co.zw/sms/sendsms.jsp?user=Tapuwam&password=@Tree123&mobiles="+user.getMobileNumber()+"&sms="+"Your One Time Pin is: "+otp+" Keep it safe and Do not share with anyone"+"&senderid=Digital";
 
 
-        userService.add(user);
+        userService.update(user);
 
         String response = restTemplate.getForObject(uri,  String.class);
 
@@ -187,8 +182,24 @@ public class UserController {
 
 
     }
+    @PostMapping(value = "/opt-out",produces = {MediaType.APPLICATION_XML_VALUE,MediaType.APPLICATION_JSON_VALUE})
+    @ApiOperation(value = "opt-out a user from the digital services customer base", response = ApiResponse.class)
+    public String SendOptOutSms(@Valid @RequestBody  AddUserDto addUserDto) {
+        User user = userService.findByMobileNumber(addUserDto.getMobileNumber());
+
+        user.setActive(false);
 
 
+        String uri = "https://bulksms.econet.co.zw/sms/sendsms.jsp?user=Tapuwam&password=@Tree123&mobiles=" + user.getMobileNumber() + "&sms=Dear User You have Successfully Opt-out from the Digital Services Optin Base&senderid=Digital";
+
+
+        //userService.add(user);
+
+        String response = restTemplate.getForObject(uri, String.class);
+
+        return response;
+
+    }
 
 
 }

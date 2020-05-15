@@ -14,8 +14,6 @@ import zw.digitalservices.Digital.Services.Customer.models.*;
 import zw.digitalservices.Digital.Services.Customer.models.api.ApiResponse;
 import zw.digitalservices.Digital.Services.Customer.services.*;
 
-import javax.servlet.http.HttpServletRequest;
-
 @RestController
 @CrossOrigin
 @RequestMapping(value = "api/v1/opt-in", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -101,17 +99,16 @@ public class OptInController {
         return new ApiResponse(200, "SUCCESS", optInService.delete(id));
     }
 
-    @PostMapping("/create/{amount-on-sms-id}/{amount-on-data-id}/{amount-on-voice-id}/{device-type-id}/{bundle-type-id}/{service-type-id}")
-    @ApiOperation(value = "Create a new opt-in record. " +
-            "Takes amounts Ids, device Id,bundle Id and service Id  as path variables",
+    @PostMapping(value = "/register/{amount-on-sms-id}/{amount-on-data-id}/{amount-on-voice-id}/{device-type-id}/{bundle-type-id}",produces = {MediaType.APPLICATION_XML_VALUE,MediaType.APPLICATION_JSON_VALUE})
+    @ApiOperation(value = "Registers a new user on the Digital Services opt-in base. " +
+            "Takes amounts Ids, device Id and bundle Id  as path variables",
             response = ApiResponse.class)
     public String createOptIn(@RequestBody AddOptInDto optInDto,
                                    @PathVariable("amount-on-sms-id") Long amountOnSmsId,
                                    @PathVariable("amount-on-data-id") Long amountOnDataId,
                                    @PathVariable("amount-on-voice-id") Long amountOnVoiceId,
                                    @PathVariable("device-type-id") Long deviceTypeId,
-                                   @PathVariable("bundle-type-id") Long bundleTypeId,
-                                   @PathVariable("service-type-id") Long serviceTypeId, HttpServletRequest request)
+                                   @PathVariable("bundle-type-id") Long bundleTypeId)
 
 
     {
@@ -121,16 +118,18 @@ public class OptInController {
         optIn.setAmountsOnVoice(amountsService.getOne(amountOnVoiceId));
         optIn.setDeviceType(deviceService.getOne(deviceTypeId));
         optIn.setSoughtBundle(bundlesService.getOne(bundleTypeId));
-        optIn.setServiceOffered(serviceOfferedService.getOne(serviceTypeId));
+        //optIn.setServiceOffered(serviceOfferedService.getOne(serviceOfferedId));
+
         optIn.setHasBeenApproved(false);
+
 
         optInService.add(optIn);
 
-        String uri = "https://bulksms.econet.co.zw/sms/sendsms.jsp?user=Tapuwam&password=@Tree123&mobiles="+optInDto.getMobileNumber()+"&sms="+"Dear User You Have Been Successfully Registered On The Digital Services Band Platform&senderid=Digital";
+        String uri = "https://bulksms.econet.co.zw/sms/sendsms.jsp?user=Tapuwam&password=@Tree123&mobiles="+optInDto.getMobileNumber()+"&sms="+"Dear Valued Customer.Your number has been successfully added to Digital Services Optin Base&senderid=Digital";
 
-        String result = restTemplate.getForObject(uri,  String.class);
+        String response = restTemplate.getForObject(uri,  String.class);
 
-        return result;
+        return response;
 
 
     }
@@ -143,5 +142,6 @@ public class OptInController {
         return new ApiResponse(200, "SUCCESS",
                 optInService.findAllByHasBeenApproved(hasBeenApproved));
     }
+
 
 }

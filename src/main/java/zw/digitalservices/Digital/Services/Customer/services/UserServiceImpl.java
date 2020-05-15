@@ -2,6 +2,7 @@ package zw.digitalservices.Digital.Services.Customer.services;
 
 import zw.digitalservices.Digital.Services.Customer.dao.RoleRepository;
 import zw.digitalservices.Digital.Services.Customer.dao.UserRepository;
+import zw.digitalservices.Digital.Services.Customer.exceptions.UserAlreadyExistsException;
 import zw.digitalservices.Digital.Services.Customer.exceptions.UserNotFoundException;
 import zw.digitalservices.Digital.Services.Customer.models.MyUserPrincipal;
 import zw.digitalservices.Digital.Services.Customer.models.User;
@@ -36,6 +37,8 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
     @Override
     public String add(User user) {
+        Optional<User> userFromDatabase = Optional.ofNullable(userRepository.findUserByMobileNumber(user.getMobileNumber()));
+        if (userFromDatabase.isPresent())throw new UserAlreadyExistsException("Mobile number already exists");
         user.setOtp(passwordEncoder.encode(user.getOtp()));
         userRepository.save(user);
         return "User has been registered";
@@ -44,12 +47,12 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     @Transactional
     @Override
     public String update(User user) {
-        Optional<User> userFromDatabase = userRepository.findById(user.getId());
+        Optional<User> userFromDatabase = Optional.ofNullable(userRepository.findUserByMobileNumber(user.getMobileNumber()));
         if (!userFromDatabase.isPresent()) throw new UserNotFoundException("User does not exist");
         // Carry date created timestamp
         user.setDateCreated(userFromDatabase.get().getDateCreated());
         userRepository.save(user);
-        return "User with ID " + user.getId() + " has been updated";
+        return "User with mobile Number " + user.getMobileNumber() + " has been updated";
     }
 
     @Transactional
