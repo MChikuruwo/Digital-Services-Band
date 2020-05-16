@@ -159,7 +159,7 @@ public class UserController {
         }
     }
 
-    @PutMapping(value = "/resend-OTP",produces = {MediaType.APPLICATION_XML_VALUE,MediaType.APPLICATION_JSON_VALUE})
+    @PostMapping(value = "/resend-OTP",produces = {MediaType.APPLICATION_XML_VALUE,MediaType.APPLICATION_JSON_VALUE})
     @ApiOperation(value = "Generates new OTP for user.", response = ApiResponse.class)
     public String generateCredentialsForUser(@RequestBody GenerateCredentialsDto credentialsDto)  {
         // Get user by their mobile number
@@ -174,7 +174,7 @@ public class UserController {
         String uri = "https://bulksms.econet.co.zw/sms/sendsms.jsp?user=Tapuwam&password=@Tree123&mobiles="+user.getMobileNumber()+"&sms="+"Your One Time Pin is: "+otp+" Keep it safe and Do not share with anyone"+"&senderid=Digital";
 
 
-        userService.update(user);
+        userService.add(user);
 
         String response = restTemplate.getForObject(uri,  String.class);
 
@@ -193,7 +193,7 @@ public class UserController {
         String uri = "https://bulksms.econet.co.zw/sms/sendsms.jsp?user=Tapuwam&password=@Tree123&mobiles=" + user.getMobileNumber() + "&sms=Dear User You have Successfully Opt-out from the Digital Services Optin Base&senderid=Digital";
 
 
-        //userService.add(user);
+        userService.add(user);
 
         String response = restTemplate.getForObject(uri, String.class);
 

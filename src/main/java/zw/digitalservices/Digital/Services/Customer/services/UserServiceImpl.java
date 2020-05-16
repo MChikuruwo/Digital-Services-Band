@@ -1,11 +1,5 @@
 package zw.digitalservices.Digital.Services.Customer.services;
 
-import zw.digitalservices.Digital.Services.Customer.dao.RoleRepository;
-import zw.digitalservices.Digital.Services.Customer.dao.UserRepository;
-import zw.digitalservices.Digital.Services.Customer.exceptions.UserAlreadyExistsException;
-import zw.digitalservices.Digital.Services.Customer.exceptions.UserNotFoundException;
-import zw.digitalservices.Digital.Services.Customer.models.MyUserPrincipal;
-import zw.digitalservices.Digital.Services.Customer.models.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -14,6 +8,11 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import zw.digitalservices.Digital.Services.Customer.dao.RoleRepository;
+import zw.digitalservices.Digital.Services.Customer.dao.UserRepository;
+import zw.digitalservices.Digital.Services.Customer.exceptions.UserNotFoundException;
+import zw.digitalservices.Digital.Services.Customer.models.MyUserPrincipal;
+import zw.digitalservices.Digital.Services.Customer.models.User;
 
 import javax.persistence.EntityNotFoundException;
 import java.util.List;
@@ -37,8 +36,6 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
     @Override
     public String add(User user) {
-        Optional<User> userFromDatabase = Optional.ofNullable(userRepository.findUserByMobileNumber(user.getMobileNumber()));
-        if (userFromDatabase.isPresent())throw new UserAlreadyExistsException("Mobile number already exists");
         user.setOtp(passwordEncoder.encode(user.getOtp()));
         userRepository.save(user);
         return "User has been registered";
